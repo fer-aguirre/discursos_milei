@@ -2,19 +2,20 @@ import csv, requests, datetime
 from bs4 import BeautifulSoup
 import pandas as pd
 
+
 def read_csv(filename):
     """
     Reads the CSV file and returns the 'url' column as a list.
     """
     df = pd.read_csv(filename)
-    return df['url'].tolist()
+    return df["url"].tolist()
 
 
 def append_to_csv(data, filename):
     """
     Appends the data to a CSV file.
     """
-    with open(filename, 'a', newline='') as csvfile:
+    with open(filename, "a", newline="") as csvfile:
         fieldnames = ["title", "content", "date", "url"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         for row in data:
@@ -62,9 +63,11 @@ def get_article_content(soup):
     Extracts the article content from the parsed HTML content.
     """
     article = soup.find("article")
-    return "".join(
-        [p.text for p in article.find_all("p") if p.find("strong") is None]
-    ) if article else None
+    return (
+        "".join([p.text for p in article.find_all("p") if p.find("strong") is None])
+        if article
+        else None
+    )
 
 
 def get_date(soup):
@@ -115,7 +118,7 @@ def write_to_csv(data, filename):
     """
     Writes the data to a CSV file.
     """
-    with open(filename, 'w', newline='') as csvfile:
+    with open(filename, "w", newline="") as csvfile:
         fieldnames = ["title", "content", "date", "url"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
@@ -127,18 +130,19 @@ def write_to_csv(data, filename):
 def main():
     base_url = "https://www.casarosada.gob.ar/informacion/discursos/"
     keyword = "milei"
-    filename = './data/discursos_milei.csv'
-    
+    filename = "./data/discursos_milei.csv"
+
     discursos_urls = get_discursos_urls(base_url, keyword)
     existing_urls = read_csv(filename)
-    
+
     new_urls = [url for url in discursos_urls if url not in existing_urls]
-    
+
     if new_urls:
         data = create_data(new_urls)
         append_to_csv(data, filename)
     else:
         print("No new URLs found.")
+
 
 if __name__ == "__main__":
     main()
