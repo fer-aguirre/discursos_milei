@@ -15,6 +15,7 @@ requests = "^2.26.0"
 plotly = "^5.3.1"
 openpyxl = "^3.0.9"
 beautifulsoup4 = "^4.12.3"
+spacy = "^3.7.5"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.4"
