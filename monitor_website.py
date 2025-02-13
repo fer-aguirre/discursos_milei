@@ -1,4 +1,4 @@
-import csv, datetime, logging, asyncio
+import csv, datetime, logging, asyncio, requests
 import aiohttp
 from bs4 import BeautifulSoup
 import pandas as pd
