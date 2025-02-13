@@ -7,28 +7,45 @@ def read_csv(filename):
     """
     Reads the CSV file and returns the 'url' column as a list.
     """
-    df = pd.read_csv(filename)
-    return df["url"].tolist()
+    try:
+        df = pd.read_csv(filename)
+        return df["url"].tolist()
+    except FileNotFoundError:
+        print(f"File {filename} not found.")
+        return []
+    except pd.errors.EmptyDataError:
+        print(f"File {filename} is empty.")
+        return []
+    except Exception as e:
+        print(f"Error reading {filename}: {e}")
+        return []
 
 
 def append_to_csv(data, filename):
     """
     Appends the data to a CSV file.
     """
-    with open(filename, "a", newline="") as csvfile:
-        fieldnames = ["title", "content", "date", "url"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        for row in data:
-            writer.writerow(row)
+    try:
+        with open(filename, "a", newline="") as csvfile:
+            fieldnames = ["title", "content", "date", "url"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            for row in data:
+                writer.writerow(row)
+    except IOError as e:
+        print(f"Error writing to {filename}: {e}")
 
 
 def get_discursos_urls(base_url, keyword):
     """
     Fetches URLs containing the keyword from the base URL.
     """
-    response = requests.get(base_url)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
+    try:
+        response = requests.get(base_url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+    except requests.RequestException as e:
+        print(f"Error fetching {base_url}: {e}")
+        return []
     article_selector = "html body div#jm-allpage.nofluid div#jm-mainpage div#jm-mainpage-in div#jm-main.lcr.scheme1.nocolumns.clearfix div#jm-maincontent main.home-special.home-mid div.container section div.row.row-extra.row-news.row-clear-4 div.blog div.contentboxes div.box.col-sm-6.col-md-3 div.item"
     articles = soup.select(article_selector)
 
@@ -45,9 +62,13 @@ def get_content(url):
     """
     Fetches and parses HTML content from the URL.
     """
-    response = requests.get(url)
-    response.raise_for_status()
-    return BeautifulSoup(response.text, "html.parser")
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return BeautifulSoup(response.text, "html.parser")
+    except requests.RequestException as e:
+        print(f"Error fetching {url}: {e}")
+        return None
 
 
 def get_title(soup):
@@ -118,13 +139,16 @@ def write_to_csv(data, filename):
     """
     Writes the data to a CSV file.
     """
-    with open(filename, "w", newline="") as csvfile:
-        fieldnames = ["title", "content", "date", "url"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    try:
+        with open(filename, "w", newline="") as csvfile:
+            fieldnames = ["title", "content", "date", "url"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-        writer.writeheader()
-        for row in data:
-            writer.writerow(row)
+            writer.writeheader()
+            for row in data:
+                writer.writerow(row)
+    except IOError as e:
+        print(f"Error writing to {filename}: {e}")
 
 
 def main():
