@@ -134,3 +134,4 @@ notebooks/
 
 # Secret files
 config.ini
+.aider*
