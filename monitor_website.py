@@ -1,7 +1,9 @@
-import csv, requests, datetime
+import csv, requests, datetime, logging
 from bs4 import BeautifulSoup
 import pandas as pd
 
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_csv(filename):
     """
@@ -11,13 +13,13 @@ def read_csv(filename):
         df = pd.read_csv(filename)
         return df["url"].tolist()
     except FileNotFoundError:
-        print(f"File {filename} not found.")
+        logging.error(f"File {filename} not found.")
         return []
     except pd.errors.EmptyDataError:
-        print(f"File {filename} is empty.")
+        logging.warning(f"File {filename} is empty.")
         return []
     except Exception as e:
-        print(f"Error reading {filename}: {e}")
+        logging.error(f"Error reading {filename}: {e}")
         return []
 
 
@@ -32,7 +34,7 @@ def append_to_csv(data, filename):
             for row in data:
                 writer.writerow(row)
     except IOError as e:
-        print(f"Error writing to {filename}: {e}")
+        logging.error(f"Error writing to {filename}: {e}")
 
 
 def get_discursos_urls(base_url, keyword):
@@ -44,7 +46,7 @@ def get_discursos_urls(base_url, keyword):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
     except requests.RequestException as e:
-        print(f"Error fetching {base_url}: {e}")
+        logging.error(f"Error fetching {base_url}: {e}")
         return []
     article_selector = "html body div#jm-allpage.nofluid div#jm-mainpage div#jm-mainpage-in div#jm-main.lcr.scheme1.nocolumns.clearfix div#jm-maincontent main.home-special.home-mid div.container section div.row.row-extra.row-news.row-clear-4 div.blog div.contentboxes div.box.col-sm-6.col-md-3 div.item"
     articles = soup.select(article_selector)
@@ -67,7 +69,7 @@ def get_content(url):
         response.raise_for_status()
         return BeautifulSoup(response.text, "html.parser")
     except requests.RequestException as e:
-        print(f"Error fetching {url}: {e}")
+        logging.error(f"Error fetching {url}: {e}")
         return None
 
 
@@ -148,7 +150,7 @@ def write_to_csv(data, filename):
             for row in data:
                 writer.writerow(row)
     except IOError as e:
-        print(f"Error writing to {filename}: {e}")
+        logging.error(f"Error writing to {filename}: {e}")
 
 
 def main():
@@ -165,7 +167,7 @@ def main():
         data = create_data(new_urls)
         append_to_csv(data, filename)
     else:
-        print("No new URLs found.")
+        logging.info("No new URLs found.")
 
 
 if __name__ == "__main__":
