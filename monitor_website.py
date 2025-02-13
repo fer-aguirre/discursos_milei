@@ -1,4 +1,5 @@
-import csv, requests, datetime, logging
+import csv, datetime, logging, asyncio
+import aiohttp
 from bs4 import BeautifulSoup
 import pandas as pd
 
@@ -60,15 +61,17 @@ def get_discursos_urls(base_url, keyword):
     return discursos_urls
 
 
-def get_content(url):
+async def get_content(url):
     """
-    Fetches and parses HTML content from the URL.
+    Asynchronously fetches and parses HTML content from the URL.
     """
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        return BeautifulSoup(response.text, "html.parser")
-    except requests.RequestException as e:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                response.raise_for_status()
+                html = await response.text()
+                return BeautifulSoup(html, "html.parser")
+    except aiohttp.ClientError as e:
         logging.error(f"Error fetching {url}: {e}")
         return None
 
@@ -123,13 +126,16 @@ def get_date(soup):
         return None
 
 
-def create_data(discursos_urls):
+async def create_data(discursos_urls):
     """
     Creates a list of dictionaries from the list of URLs.
     """
     data = []
-    for url in discursos_urls:
-        soup = get_content(url)
+    tasks = [get_content(url) for url in discursos_urls]
+    soups = await asyncio.gather(*tasks)
+    for url, soup in zip(discursos_urls, soups):
+        if soup is None:
+            continue
         title = get_title(soup)
         content = get_article_content(soup)
         date = get_date(soup)
@@ -154,6 +160,9 @@ def write_to_csv(data, filename):
 
 
 def main():
+    asyncio.run(main_async())
+
+async def main_async():
     base_url = "https://www.casarosada.gob.ar/informacion/discursos/"
     keyword = "milei"
     filename = "./data/discursos_milei.csv"
@@ -164,7 +173,7 @@ def main():
     new_urls = [url for url in discursos_urls if url not in existing_urls]
 
     if new_urls:
-        data = create_data(new_urls)
+        data = await create_data(new_urls)
         append_to_csv(data, filename)
     else:
         logging.info("No new URLs found.")
