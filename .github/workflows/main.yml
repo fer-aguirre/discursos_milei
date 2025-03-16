@@ -1,34 +1,38 @@
-name: Run monitor_website.py
+name: Collect and Update Speeches Daily
 
 on:
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: '0 12 * * *'  # Runs every day at noon
+
+permissions:
+  contents: write
 
 jobs:
-  build:
-
+  collect_and_update_data:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js 20.x
-      uses: actions/setup-node@v4
+    - name: Checkout repository
+      uses: actions/checkout@v2
       with:
-        node-version: '20.x'
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v3
+        persist-credentials: false  # Ensure credentials are not persisted
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.8
+        python-version: '3.x'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests beautifulsoup4 pandas
-    - name: Run monitor_website.py
-      run: python monitor_website.py
+        pip install -r requirements.txt
 
-    - name: Commit and push if changed
+    - name: Run collect_data script
+      run: python collect_data.py ./data/discursos_milei.csv
+
+    - name: Commit and push
       run: |
-        git add .
-        git diff --quiet && git diff --staged --quiet || (git commit -m 'Update discursos_milei.csv'; git push)
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add ./data/discursos_milei.csv
+        git diff --cached --quiet || git commit -m "Update discursos_milei.csv"
