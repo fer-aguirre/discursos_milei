@@ -10,13 +10,12 @@ permissions:
 
 jobs:
   scrape:
+    name: Scrape
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout
       uses: actions/checkout@v4
-      with:
-        persist-credentials: false  # Ensure credentials are not persisted
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -35,10 +34,8 @@ jobs:
       run: date > ./data/latest-scrape.txt
 
     - name: Commit and push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@users.noreply.github.com"
         git add ./data/
-        git commit -m "Latest data for Milei's speeches" && git push || true
+        git commit -m "Latest data for Milei's speeches" --author="fer-aguirre <fer-aguirre@users.noreply.github.com>" && git push || true
