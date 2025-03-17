@@ -29,7 +29,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Scrape
-      run: python collect_and_update_data
+      run: python collect_and_update_data.py
 
     - name: Save datestamp
       run: date > ./data/latest-scrape.txt
