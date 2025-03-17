@@ -22,7 +22,6 @@ def check_csv_exists_and_fetch_missing(keyword, base_url):
     Returns:
         list: A list of new URLs not present in the existing CSV.
     """
-    from scripts.collect_data import get_discursos_urls
 
     csv_file = os.path.join(".", "data", f"discursos_{keyword}.csv")
     existing_urls = []
