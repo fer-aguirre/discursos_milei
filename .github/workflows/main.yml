@@ -29,12 +29,11 @@ jobs:
         pip install -r requirements.txt
 
     - name: Scrape
-      run: python collect_and_update_data.py
-      
-    - name: Save datestamp
-      run: date > ./data/latest-scrape.txt
+      run: python collect_data.py ./data/
 
     - name: Commit and push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@users.noreply.github.com"
