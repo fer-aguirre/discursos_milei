@@ -3,7 +3,7 @@ name: Collect, update and save
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * *'  # Runs every day at 00:00 UTC
+    - cron: '0 0 */14 * *'  # Runs every 14 days
 
 permissions:
   contents: write
